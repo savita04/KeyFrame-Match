@@ -1,0 +1,47 @@
+import cv2
+import skimage.measure
+import timeit
+import numpy as np
+
+first_frame = True
+
+def get_similarity_score(key_frame,current_frame):
+    return abs(skimage.measure.structural_similarity(key_frame,current_frame))
+
+def write_all_matched_frames():
+    for i,frame in enumerate(top_five_frames):
+        cv2.imwrite("matched%d.png"%i,frame.frame)
+
+def get_similar_frames():
+    global first_frame
+    cap = cv2.VideoCapture(0)
+    ret,frame = cap.read()
+    img = cv2.imread("key.jpg")
+    key_frame = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+
+    # for i,frame in enumerate(videogen):
+    while ret:
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        score = get_similarity_score(key_frame,gray)
+        print(score)
+        if score > 0.8:
+            text = "Fridge is Empty"
+        else:
+            text = "object found"
+        
+     #   frame = cv2.flip(frame,-1)
+
+        cv2.putText(frame, text, (230, 50), 0, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
+        cv2.imshow("cam",frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+        ret,frame = cap.read()
+
+    cap.release()
+
+
+get_similar_frames()
+
+
+cv2.destroyAllWindows()
